@@ -3,14 +3,12 @@
 // ===== APP INITIALISERING =====
 document.addEventListener("DOMContentLoaded", initApp);
 
-// Global variabel til alle spil
 let allGames = [];
 
 // #1: Initialize the app - sæt event listeners og hent data
 function initApp() {
   getGames(); // Hent spil data fra JSON fil
 
-  // Event listeners for alle filtre - kører filterGames når brugeren ændrer noget
   document
     .querySelector("#search-input")
     .addEventListener("input", filterGames);
@@ -33,12 +31,11 @@ async function getGames() {
   );
   allGames = await response.json();
 
-  populateCategoryDropdown(); // Udfyld dropdown med kategorier/genre fra data
-  displayGames(allGames); // Vis alle spil ved start
+  populateCategoryDropdown();
+  displayGames(allGames);
 }
 
 // ===== VISNING AF SPIL =====
-// #3: Display all games
 function displayGames(games) {
   const gameList = document.querySelector("#game-list");
   gameList.innerHTML = "";
@@ -54,13 +51,23 @@ function displayGames(games) {
   }
 }
 
-// #4: Render a single game card and add event listeners
+function playersText(game) {
+  const min = game.players?.min;
+  const max = game.players?.max;
+  if (min == null && max == null) return "";
+  if (Number.isFinite(min) && Number.isFinite(max)) {
+    return min === max ? `${min} spillere` : `${min}-${max} spillere`;
+  }
+  if (Number.isFinite(min) && !Number.isFinite(max)) return `${min}+ spillere`;
+  return "";
+}
+function playtimeText(game) {
+  const m = Number(game.playtime);
+  return Number.isFinite(m) ? `${m} min.` : "";
+}
+
 function displayGame(game) {
   const gameList = document.querySelector("#game-list");
-  const genreText = Array.isArray(game.genre)
-    ? game.genre.join(", ")
-    : game.genre ?? "";
-
   const gameHTML = /*html*/ `
     <article class="game-card" tabindex="0">
       <img src="${game.image}" alt="Poster of ${
@@ -68,14 +75,14 @@ function displayGame(game) {
   }" class="game-poster"/>
       <div class="game-info">
         <h3>${game.title}</h3>
-        <p class="game-genre">${genreText}</p>
-        <p class="game-players"><strong>Spillere:</strong> ${
-          game.players ?? ""
-        }</p>
-        <p class="game-playtime"><strong>Varighed:</strong> ${
-          game.playtime ?? ""
-        }</p>
-        ${game.rating ? `<p class="game-rating">⭐ ${game.rating}</p>` : ""}
+        <p class="game-genre">${String(game.genre ?? "")}</p>
+        <p class="game-players"><strong>Spillere:</strong> ${playersText(
+          game
+        )}</p>
+        <p class="game-playtime"><strong>Varighed:</strong> ${playtimeText(
+          game
+        )}</p>
+         <p class="game-rating">⭐ ${game.rating ?? ""}</p>
       </div>
     </article>
   `;
@@ -97,14 +104,12 @@ function displayGame(game) {
 }
 
 // ===== DROPDOWN OG MODAL FUNKTIONER =====
-// #5: Udfyld kategori-dropdown
 function populateCategoryDropdown() {
   const categorySelect = document.querySelector("#category");
   const categories = new Set();
 
   for (const game of allGames) {
-    const list = Array.isArray(game.genre) ? game.genre : [game.genre];
-    for (const g of list) if (g) categories.add(g);
+    if (game.genre) categories.add(String(game.genre));
   }
 
   categorySelect.innerHTML = /*html*/ `<option value="all">Kategori</option>`;
@@ -119,16 +124,13 @@ function populateCategoryDropdown() {
 
 // #6: Modal
 function showGameModal(game) {
-  const genreText = Array.isArray(game.genre)
-    ? game.genre.join(", ")
-    : game.genre ?? "";
   document.querySelector("#dialog-content").innerHTML = /*html*/ `
     <img src="${game.image}" alt="Poster af ${game.title}" class="game-poster">
     <div class="dialog-details">
       <h2>${game.title}</h2>
-      <p class="game-genre">${genreText}</p>
-      <p class="players"><strong>Spillere:</strong> ${game.players ?? ""}</p>
-      <p class="playtime"><strong>Varighed:</strong> ${game.playtime ?? ""}</p>
+      <p class="game-genre">${String(game.genre ?? "")}</p>
+      <p class="players"><strong>Spillere:</strong> ${playersText(game)}</p>
+      <p class="playtime"><strong>Varighed:</strong> ${playtimeText(game)}</p>
       ${game.rating ? `<p class="game-rating">⭐ ${game.rating}</p>` : ""}
       ${
         game.description
@@ -138,33 +140,6 @@ function showGameModal(game) {
     </div>
   `;
   document.querySelector("#game-dialog").showModal();
-}
-
-// ===== HJÆLPERE TIL ROBUST MATCH =====
-function parsePlayers(text) {
-  // "2-6 spillere", "6+ spillere", "2 spillere"
-  const t = String(text ?? "").toLowerCase();
-  const nums = t.match(/\d+/g)?.map(Number) ?? [];
-  if (t.includes("+") && nums.length >= 1)
-    return { min: nums[0], max: Infinity };
-  if (t.includes("-") && nums.length >= 2)
-    return { min: nums[0], max: nums[1] };
-  if (nums.length >= 1) return { min: nums[0], max: nums[0] };
-  return { min: -Infinity, max: Infinity };
-}
-function parseMinutes(text) {
-  // "ca. 30 min.", "90-120 min."
-  const nums =
-    String(text ?? "")
-      .match(/\d+/g)
-      ?.map(Number) ?? [];
-  if (nums.length === 0) return { min: -Infinity, max: Infinity };
-  if (nums.length === 1) return { min: nums[0], max: nums[0] };
-  nums.sort((a, b) => a - b);
-  return { min: nums[0], max: nums[nums.length - 1] };
-}
-function overlaps(a, b) {
-  return !(a.max < b.min || b.max < a.min);
 }
 
 // ===== FILTER FUNKTIONER =====
@@ -182,57 +157,57 @@ function filterGames() {
   const searchValue = document
     .querySelector("#search-input")
     .value.toLowerCase();
-  const playersValue = document.querySelector("#number-players").value; // "1-2","3","4","5","6+"
-  const timeValue = document.querySelector("#time").value; // "20","30","40","45","60+"
-  const categoryValue = document.querySelector("#category").value; // fx "Strategispil"
+  const playersValue = document.querySelector("#number-players").value;
+  const timeValue = document.querySelector("#time").value;
+  const categoryValue = document.querySelector("#category").value;
 
   let filtered = allGames.slice();
 
-  // Søgetekst i titel
+  // 1) Søg i titel
   if (searchValue) {
-    filtered = filtered.filter((game) =>
-      game.title?.toLowerCase().includes(searchValue)
+    filtered = filtered.filter((g) =>
+      g.title?.toLowerCase().includes(searchValue)
     );
   }
 
-  // Antal spillere (robust: overlap)
+  // 2) Antal spillere — brug JSONs {min,max}
   if (playersValue !== "all") {
-    const want = playersValue.endsWith("+")
-      ? { min: parseInt(playersValue), max: Infinity }
-      : playersValue.includes("-")
-      ? {
-          min: parseInt(playersValue.split("-")[0]),
-          max: parseInt(playersValue.split("-")[1]),
-        }
-      : { min: parseInt(playersValue), max: parseInt(playersValue) };
+    let wantMin, wantMax;
+    if (playersValue.endsWith("+")) {
+      wantMin = parseInt(playersValue, 10);
+      wantMax = Infinity;
+    } else if (playersValue.includes("-")) {
+      const [a, b] = playersValue.split("-").map((n) => parseInt(n, 10));
+      wantMin = a;
+      wantMax = b;
+    } else {
+      const n = parseInt(playersValue, 10);
+      wantMin = n;
+      wantMax = n;
+    }
 
-    filtered = filtered.filter((game) =>
-      overlaps(parsePlayers(game.players), want)
-    );
+    filtered = filtered.filter((g) => {
+      const haveMin = g.players?.min ?? -Infinity;
+      const haveMax = g.players?.max ?? Infinity;
+
+      return !(wantMax < haveMin || haveMax < wantMin);
+    });
   }
 
-  // Varighed (robust: 60+ matcher 90-120 osv.)
   if (timeValue !== "all") {
     if (timeValue.endsWith("+")) {
-      const n = parseInt(timeValue);
-      filtered = filtered.filter(
-        (game) => parseMinutes(game.playtime).max >= n
-      );
+      const n = parseInt(timeValue, 10);
+      filtered = filtered.filter((g) => Number(g.playtime) >= n);
     } else {
-      const n = parseInt(timeValue);
-      filtered = filtered.filter((game) => {
-        const have = parseMinutes(game.playtime);
-        return have.min <= n && n <= have.max;
-      });
+      const n = parseInt(timeValue, 10);
+
+      filtered = filtered.filter((g) => Number(g.playtime) === n);
     }
   }
 
-  // Kategori/genre
+  // 4) Kategori/genre — streng i JSON
   if (categoryValue !== "all") {
-    filtered = filtered.filter((game) => {
-      const g = Array.isArray(game.genre) ? game.genre : [game.genre];
-      return g.filter(Boolean).includes(categoryValue);
-    });
+    filtered = filtered.filter((g) => String(g.genre) === categoryValue);
   }
 
   displayGames(filtered);
