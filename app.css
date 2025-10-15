@@ -1,31 +1,22 @@
-/* =====================
-   DARK MODE CSS VARIABLES
-   ===================== */
 :root {
   /* Colors */
-  --primary: #264c59;
-  --secondary: #acc6c9;
-  --primary-light: #42535c;
-  --secondary-light: #3c4043;
+  --primary: #fbf1f1;
+  --secondary: #d5d2d2;
+  --primary-light: #fbf1f1;
+  --secondary-light: #ffffff;
 
   /* Text - Dark Mode Colors */
-  --text: #f1f3f4;
-  --text-light: #dadce0;
+  --text: #000000;
+  --text-light: #2f2f2f;
 
   /* Backgrounds - Dark Mode */
-  --bg: #202124;
-  --bg-card: #3c4043;
+  --bg: #fbf1f1;
+  --bg-card: #ffffff;
 
-  /* Semantic */
-  --success: #34a853;
-  --warning: #fbc02d;
-  --error: #ea4335;
-
-  /* Effects */
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
-  --radius: 1rem;
-  --transition: 250ms ease;
+  --radius: 14px;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --warning: #080808;
 }
 
 /* =====================
@@ -42,12 +33,8 @@ body {
     sans-serif;
   font-size: 1rem;
   line-height: 1.6;
-  background: linear-gradient(
-    135deg,
-    var(--bg) 0%,
-    #1a1a1a 50%,
-    var(--primary-light) 100%
-  );
+  background: var(--bg);
+
   color: var(--text);
   min-height: 100vh;
 }
@@ -65,120 +52,61 @@ main {
    FILTERBAR (SØG/SORT/FILTER)
    ===================== */
 .filterbar {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(172, 198, 201, 0.1);
-}
-
-/* Filter rækker */
-.filter-row-main {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.filter-row-ranges {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 1rem;
-  align-items: end;
-}
-
-/* Filter grupper */
-.filter-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-group label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text);
-  display: block;
-}
-
-/* Range grupper */
-.range-group {
-  flex: 1;
-}
-
-.range-label {
-  margin-bottom: 0.5rem;
-}
-
-.range-inputs {
-  display: flex;
+  gap: 1rem;
   align-items: center;
-  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
-.range-separator {
-  color: var(--secondary);
-  font-weight: bold;
-  font-size: 1.2rem;
+#search-input {
+  width: 80%;
+  max-width: 600px;
+  min-width: 240px;
+  align-self: center;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Input felter styling */
 #search-input,
 #genre-select,
-#sort-select,
-#year-from,
-#year-to,
-#rating-from,
-#rating-to {
-  background: var(--bg);
+#sort-select {
+  background: var(--bg-card);
   color: var(--text);
-  border: 1px solid rgba(172, 198, 201, 0.3);
-  border-radius: calc(var(--radius) * 0.5);
+  border: 1px solid var(--secondary);
+  border-radius: 999px;
   padding: 0.75rem 1rem;
-  font-size: 1rem;
+  font-size: 16px;
   transition: var(--transition);
-  width: 100%;
+  box-shadow: var(--shadow-sm);
 }
 
 #search-input:focus,
 #genre-select:focus,
-#sort-select:focus,
-#year-from:focus,
-#year-to:focus,
-#rating-from:focus,
-#rating-to:focus {
-  outline: none;
+#sort-select:focus {
+  outline: 2px solid var(--secondary);
   border-color: var(--secondary);
-  box-shadow: 0 0 0 3px rgba(172, 198, 201, 0.2);
 }
 
-#search-input::placeholder,
-#year-from::placeholder,
-#year-to::placeholder,
-#rating-from::placeholder,
-#rating-to::placeholder {
+#search-input::placeholder {
   color: var(--text-light);
-  opacity: 0.6;
+  opacity: 1;
 }
 
 #genre-select,
 #sort-select {
+  min-width: 160px;
   cursor: pointer;
-}
-
-/* Search group særlig styling */
-.search-group {
-  grid-column: 1 / 2;
 }
 
 /* =====================
    HEADER & FOOTER
    ===================== */
 header {
-  background: rgba(38, 76, 89, 0.8);
+  background: #fbf1f1;
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(172, 198, 201, 0.2);
+  border-bottom: 1px solid var(--secondary-light);
   color: var(--text);
   padding: 1rem 0;
   text-align: center;
@@ -196,83 +124,47 @@ header h1 {
   letter-spacing: -0.025em;
 }
 
-footer {
-  background: var(--primary);
-  color: var(--text);
-  text-align: center;
-  padding: 2rem 1rem;
-  margin-top: 4rem;
-}
-
-/* (main er allerede defineret ovenfor - dublet fjernet) */
-
-/* =====================
-   MOVIE GRID & CARDS
-   ===================== */
-#movie-list {
+#game-list {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
-  padding: 2rem 0;
-}
-@media (min-width: 600px) {
-  #movie-list {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (min-width: 992px) {
-  #movie-list {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-@media (min-width: 1400px) {
-  #movie-list {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
 }
 
-.movie-card {
+.game-card {
+  width: 100%;
+  height: 320px;
   background: var(--bg-card);
-  border-radius: var(--radius);
+  border-radius: 16px;
   box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   overflow: hidden;
-  transition: var(--transition);
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.movie-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--secondary);
-}
-
-.movie-card:focus {
+.game-card:focus {
   outline: 3px solid var(--secondary);
   outline-offset: 2px;
 }
 
-.movie-poster {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-  background: linear-gradient(
-    135deg,
-    var(--secondary-light),
-    var(--primary-light)
-  );
+.game-poster {
+  justify-content: center;
+  align-self: center;
+  max-width: 100%;
+  max-height: 180px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
   transition: var(--transition);
+  border-bottom: 1px solid #ccc;
 }
 
-.movie-card:hover .movie-poster {
-  transform: scale(1.05);
+.game-info {
+  padding: 3rem;
 }
 
-.movie-info {
-  padding: 1.5rem;
-}
-
-.movie-info h3 {
+.game-info h3 {
   font-size: clamp(1.125rem, 2vw, 1.375rem);
   font-weight: 600;
   color: var(--text);
@@ -280,50 +172,39 @@ footer {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  margin-top: -2.5rem;
 }
 
-.movie-year {
+.game-genre {
   color: var(--text-light);
-  font-size: 0.875rem;
-  background: var(--secondary-light);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.5rem;
-  white-space: nowrap;
-}
-
-.movie-genre {
-  color: var(--text-light);
-  font-size: 0.9rem;
+  font-size: 1rem;
   margin-bottom: 0.75rem;
 }
 
-.movie-rating {
+.game-rating {
   color: var(--warning);
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: right;
   display: flex;
-  align-items: center;
+  align-items: right;
   gap: 0.25rem;
+  float: right;
 }
 
-.movie-rating::before {
-  content: "⭐";
-}
-
-.movie-director {
+.game-playtime {
   color: var(--text-light);
-  font-size: 0.875rem;
-}
-
-.movie-director strong {
-  color: var(--text);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+  text-align: left;
 }
 
 /* =====================
-   MOVIE DIALOG
+   GAME DIALOG
    ===================== */
-dialog#movie-dialog {
+dialog#game-dialog {
   border: none;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
@@ -337,7 +218,7 @@ dialog#movie-dialog {
   margin: auto;
 }
 
-dialog#movie-dialog::backdrop {
+dialog#game-dialog::backdrop {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
 }
@@ -377,16 +258,16 @@ dialog#movie-dialog::backdrop {
   max-height: 90vh;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   #dialog-content {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     padding: 1.5rem;
     gap: 1.5rem;
     text-align: center;
   }
 }
 
-#dialog-content img.movie-poster {
+#dialog-content img.game-poster {
   width: 100%;
   height: auto;
   max-height: 500px;
@@ -396,7 +277,7 @@ dialog#movie-dialog::backdrop {
 }
 
 @media (max-width: 768px) {
-  #dialog-content img.movie-poster {
+  #dialog-content img.game-poster {
     max-width: 300px;
     margin: 0 auto;
   }
@@ -416,7 +297,7 @@ dialog#movie-dialog::backdrop {
   margin: 0 0 1rem 0;
 }
 
-#dialog-content .movie-year {
+#dialog-content {
   display: inline-block;
   background: var(--secondary-light);
   color: var(--primary);
@@ -438,13 +319,13 @@ dialog#movie-dialog::backdrop {
   font-weight: 600;
 }
 
-#dialog-content .movie-genre {
+#dialog-content .game-genre {
   color: var(--secondary);
   font-weight: 500;
   font-size: 1.1rem;
 }
 
-#dialog-content .movie-rating {
+#dialog-content .game-rating {
   color: var(--warning);
   font-weight: 600;
   font-size: 1.125rem;
@@ -454,12 +335,12 @@ dialog#movie-dialog::backdrop {
 }
 
 @media (max-width: 768px) {
-  #dialog-content .movie-rating {
+  #dialog-content .game-rating {
     justify-content: center;
   }
 }
 
-.movie-description {
+.game-description {
   color: var(--text) !important;
   font-size: 1.1rem !important;
   line-height: 1.7 !important;
@@ -472,106 +353,18 @@ dialog#movie-dialog::backdrop {
 }
 
 /* =====================
-   CLEAR FILTERS BUTTON
-   ===================== */
-#clear-filters {
-  background: linear-gradient(135deg, var(--error) 0%, #c62828 100%);
-  color: white;
-  border: none;
-  border-radius: calc(var(--radius) * 0.5);
-  padding: 0.875rem 1.5rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: var(--transition);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-  box-shadow: var(--shadow);
-}
-
-#clear-filters:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
-}
-
-#clear-filters:active {
-  transform: translateY(0);
-}
-
-#clear-filters:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.3);
-}
-
-.btn-icon {
-  font-size: 1.1rem;
-}
-
-.btn-text {
-  font-size: 0.95rem;
-}
-
-.no-results {
-  text-align: center;
-  color: var(--text-light);
-  font-size: 1.2rem;
-  margin: 2rem 0;
-  padding: 2rem;
-  background: var(--bg-card);
-  border-radius: var(--radius);
-}
-
-/* =====================
-   RESPONSIVE FILTERBAR
-   ===================== */
-@media (max-width: 900px) {
-  .filter-row-main {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .filter-row-ranges {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  #clear-filters {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 600px) {
-  .filterbar {
-    padding: 1rem;
-  }
-
-  .range-inputs {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .range-separator {
-    transform: rotate(90deg);
-  }
-
-  #clear-filters {
-    padding: 1rem;
-    width: 100%;
-  }
-}
-
-/* =====================
    RESPONSIVE & ACCESSIBILITY
    ===================== */
-@media (max-width: 480px) {
-  #movie-list {
-    grid-template-columns: 1fr;
+
+/* TIL MOBIL VISNING */
+@media (min-width: 600px) {
+  #game-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr 1fr));
     gap: 1.5rem;
+    padding: 2rem 0;
   }
-  .movie-card {
+  .game-card {
     max-width: 350px;
     margin: 0 auto;
   }
@@ -580,26 +373,9 @@ dialog#movie-dialog::backdrop {
   }
 }
 
-/* Focus styles for keyboard navigation */
+/* Focus styles for keyboard navigation ??? */
 .movie-card:focus-visible,
 #close-dialog:focus-visible {
   outline: 3px solid var(--secondary);
   outline-offset: 2px;
-}
-
-/* =====================
-   DARK MODE ADJUSTMENTS
-   ===================== */
-@media (prefers-color-scheme: dark) {
-  .movie-year {
-    background: var(--primary);
-    color: var(--secondary);
-  }
-  #dialog-content .movie-year {
-    background: var(--primary);
-    color: var(--secondary);
-  }
-  #close-dialog {
-    background: rgba(23, 23, 23, 0.9);
-  }
 }

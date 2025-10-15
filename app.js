@@ -1,32 +1,24 @@
 "use strict";
 
 // ===== APP INITIALISERING =====
-// Start app når DOM er loaded (hele HTML siden er færdig med at indlæse)
 document.addEventListener("DOMContentLoaded", initApp);
 
-// Global variabel til alle film - tilgængelig for alle funktioner
-let allMovies = [];
+// Global variabel til alle spil
+let allGames = [];
 
 // #1: Initialize the app - sæt event listeners og hent data
 function initApp() {
-  getMovies(); // Hent film data fra JSON fil
+  getGames(); // Hent spil data fra JSON fil
 
-  // Event listeners for alle filtre - kører filterMovies når brugeren ændrer noget
+  // Event listeners for alle filtre - kører filterGames når brugeren ændrer noget
   document
     .querySelector("#search-input")
-    .addEventListener("input", filterMovies);
+    .addEventListener("input", filterGames);
   document
-    .querySelector("#genre-select")
-    .addEventListener("change", filterMovies);
-  document
-    .querySelector("#sort-select")
-    .addEventListener("change", filterMovies);
-  document.querySelector("#year-from").addEventListener("input", filterMovies);
-  document.querySelector("#year-to").addEventListener("input", filterMovies);
-  document
-    .querySelector("#rating-from")
-    .addEventListener("input", filterMovies);
-  document.querySelector("#rating-to").addEventListener("input", filterMovies);
+    .querySelector("#number-players")
+    .addEventListener("change", filterGames);
+  document.querySelector("#time").addEventListener("change", filterGames);
+  document.querySelector("#category").addEventListener("change", filterGames);
 
   // Event listener for clear-knappen - rydder alle filtre
   document
@@ -34,210 +26,214 @@ function initApp() {
     .addEventListener("click", clearAllFilters);
 }
 
-// #2: Fetch movies from JSON file - asynkron funktion der henter data
-async function getMovies() {
-  // Hent data fra URL - await venter på svar før vi går videre
+// #2: Fetch games from JSON file
+async function getGames() {
   const response = await fetch(
-    "https://raw.githubusercontent.com/cederdorff/race/refs/heads/master/data/movies.json"
+    "https://raw.githubusercontent.com/cederdorff/race/refs/heads/master/data/games.json"
   );
+  allGames = await response.json();
 
-  // Pars JSON til JS array og gem i global variabel, der er tilgængelig for alle funktioner
-  allMovies = await response.json();
-
-  populateGenreDropdown(); // Udfyld dropdown med genrer fra data
-  displayMovies(allMovies); // Vis alle film ved start
+  populateCategoryDropdown(); // Udfyld dropdown med kategorier/genre fra data
+  displayGames(allGames); // Vis alle spil ved start
 }
 
-// ===== VISNING AF FILM =====
-// #3: Display all movies - vis en liste af film på siden
-function displayMovies(movies) {
-  const movieList = document.querySelector("#movie-list"); // Find container til film
-  movieList.innerHTML = ""; // Ryd gammel liste (fjern alt HTML indhold)
+// ===== VISNING AF SPIL =====
+// #3: Display all games
+function displayGames(games) {
+  const gameList = document.querySelector("#game-list");
+  gameList.innerHTML = "";
 
-  // Hvis ingen film matcher filtrene, vis en besked til brugeren
-  if (movies.length === 0) {
-    movieList.innerHTML =
-      '<p class="no-results">Ingen film matchede dine filtre 😢</p>';
-    return; // Stop funktionen her - return betyder "stop her og gå ikke videre"
+  if (!games || games.length === 0) {
+    gameList.innerHTML =
+      '<p class="no-results">Ingen spil matchede dine filtre 😢</p>';
+    return;
   }
 
-  // Loop gennem alle film og vis hver enkelt
-  for (const movie of movies) {
-    displayMovie(movie); // Kald displayMovie for hver film
+  for (const game of games) {
+    displayGame(game);
   }
 }
 
-// #4: Render a single movie card and add event listeners - lav et film kort
-function displayMovie(movie) {
-  const movieList = document.querySelector("#movie-list"); // Find container til film
+// #4: Render a single game card and add event listeners
+function displayGame(game) {
+  const gameList = document.querySelector("#game-list");
+  const genreText = Array.isArray(game.genre)
+    ? game.genre.join(", ")
+    : game.genre ?? "";
 
-  // Byg HTML struktur dynamisk - template literal med ${} til at indsætte data
-  const movieHTML = /*html*/ `
-    <article class="movie-card" tabindex="0">
-      <img src="${movie.image}" 
-           alt="Poster of ${movie.title}" 
-           class="movie-poster" />
-      <div class="movie-info">
-        <h3>${movie.title} <span class="movie-year">(${movie.year})</span></h3>
-        <p class="movie-genre">${movie.genre.join(", ")}</p>
-        <p class="movie-rating">⭐ ${movie.rating}</p>
-        <p class="movie-director"><strong>Director:</strong> ${
-          movie.director
+  const gameHTML = /*html*/ `
+    <article class="game-card" tabindex="0">
+      <img src="${game.image}" alt="Poster of ${
+    game.title
+  }" class="game-poster"/>
+      <div class="game-info">
+        <h3>${game.title}</h3>
+        <p class="game-genre">${genreText}</p>
+        <p class="game-players"><strong>Spillere:</strong> ${
+          game.players ?? ""
         }</p>
+        <p class="game-playtime"><strong>Varighed:</strong> ${
+          game.playtime ?? ""
+        }</p>
+        ${game.rating ? `<p class="game-rating">⭐ ${game.rating}</p>` : ""}
       </div>
     </article>
   `;
 
-  // Tilføj movie card til DOM (HTML) - insertAdjacentHTML sætter HTML ind uden at overskrive
-  movieList.insertAdjacentHTML("beforeend", movieHTML);
+  gameList.insertAdjacentHTML("beforeend", gameHTML);
 
-  // Find det kort vi lige har tilføjet (det sidste element)
-  const newCard = movieList.lastElementChild;
+  const newCard = gameList.lastElementChild;
 
-  // Tilføj click event til kortet - når brugeren klikker på kortet
   newCard.addEventListener("click", function () {
-    showMovieModal(movie); // Vis modal med film detaljer
+    showGameModal(game);
   });
 
-  // Tilføj keyboard support (Enter og mellemrum) for tilgængelighed
   newCard.addEventListener("keydown", function (event) {
     if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault(); // Forhindre scroll ved mellemrum
-      showMovieModal(movie); // Vis modal med film detaljer
+      event.preventDefault();
+      showGameModal(game);
     }
   });
 }
 
 // ===== DROPDOWN OG MODAL FUNKTIONER =====
-// #5: Udfyld genre-dropdown med alle unikke genrer fra data
-function populateGenreDropdown() {
-  const genreSelect = document.querySelector("#genre-select"); // Find genre dropdown
-  const genres = new Set(); // Set fjerner automatisk dubletter
+// #5: Udfyld kategori-dropdown
+function populateCategoryDropdown() {
+  const categorySelect = document.querySelector("#category");
+  const categories = new Set();
 
-  // Samle alle unikke genrer fra alle film
-  // Hver film kan have flere genrer (array), så vi løber gennem dem alle
-  for (const movie of allMovies) {
-    for (const genre of movie.genre) {
-      genres.add(genre); // Set sikrer kun unikke værdier
-    }
+  for (const game of allGames) {
+    const list = Array.isArray(game.genre) ? game.genre : [game.genre];
+    for (const g of list) if (g) categories.add(g);
   }
 
-  // Fjern gamle options undtagen 'Alle genrer' (reset dropdown)
-  genreSelect.innerHTML = /*html*/ `<option value="all">Alle genrer</option>`;
-
-  // Sortér genres alfabetisk og tilføj dem som options
-  const sortedGenres = [...genres].sort(); // Konvertér Set til Array og sortér genrer
-  for (const genre of sortedGenres) {
-    genreSelect.insertAdjacentHTML(
+  categorySelect.innerHTML = /*html*/ `<option value="all">Kategori</option>`;
+  const sorted = [...categories].sort();
+  for (const cat of sorted) {
+    categorySelect.insertAdjacentHTML(
       "beforeend",
-      /*html*/ `<option value="${genre}">${genre}</option>`
+      /*html*/ `<option value="${cat}">${cat}</option>`
     );
   }
 }
 
-// #6: Vis movie i modal dialog - popup vindue med film detaljer
-function showMovieModal(movie) {
-  // Find modal indhold container og byg HTML struktur dynamisk
+// #6: Modal
+function showGameModal(game) {
+  const genreText = Array.isArray(game.genre)
+    ? game.genre.join(", ")
+    : game.genre ?? "";
   document.querySelector("#dialog-content").innerHTML = /*html*/ `
-    <img src="${movie.image}" alt="Poster af ${
-    movie.title
-  }" class="movie-poster">
+    <img src="${game.image}" alt="Poster af ${game.title}" class="game-poster">
     <div class="dialog-details">
-      <h2>${movie.title} <span class="movie-year">(${movie.year})</span></h2>
-      <p class="movie-genre">${movie.genre.join(", ")}</p>
-      <p class="movie-rating">⭐ ${movie.rating}</p>
-      <p><strong>Director:</strong> ${movie.director}</p>
-      <p><strong>Actors:</strong> ${movie.actors.join(", ")}</p>
-      <p class="movie-description">${movie.description}</p>
+      <h2>${game.title}</h2>
+      <p class="game-genre">${genreText}</p>
+      <p class="players"><strong>Spillere:</strong> ${game.players ?? ""}</p>
+      <p class="playtime"><strong>Varighed:</strong> ${game.playtime ?? ""}</p>
+      ${game.rating ? `<p class="game-rating">⭐ ${game.rating}</p>` : ""}
+      ${
+        game.description
+          ? `<p class="game-description">${game.description}</p>`
+          : ""
+      }
     </div>
   `;
+  document.querySelector("#game-dialog").showModal();
+}
 
-  // Åbn modalen - showModal() er en built-in browser funktion
-  document.querySelector("#movie-dialog").showModal();
+// ===== HJÆLPERE TIL ROBUST MATCH =====
+function parsePlayers(text) {
+  // "2-6 spillere", "6+ spillere", "2 spillere"
+  const t = String(text ?? "").toLowerCase();
+  const nums = t.match(/\d+/g)?.map(Number) ?? [];
+  if (t.includes("+") && nums.length >= 1)
+    return { min: nums[0], max: Infinity };
+  if (t.includes("-") && nums.length >= 2)
+    return { min: nums[0], max: nums[1] };
+  if (nums.length >= 1) return { min: nums[0], max: nums[0] };
+  return { min: -Infinity, max: Infinity };
+}
+function parseMinutes(text) {
+  // "ca. 30 min.", "90-120 min."
+  const nums =
+    String(text ?? "")
+      .match(/\d+/g)
+      ?.map(Number) ?? [];
+  if (nums.length === 0) return { min: -Infinity, max: Infinity };
+  if (nums.length === 1) return { min: nums[0], max: nums[0] };
+  nums.sort((a, b) => a - b);
+  return { min: nums[0], max: nums[nums.length - 1] };
+}
+function overlaps(a, b) {
+  return !(a.max < b.min || b.max < a.min);
 }
 
 // ===== FILTER FUNKTIONER =====
-// #7: Ryd alle filtre - reset alle filter felter til tomme værdier
+// #7: Ryd alle filtre
 function clearAllFilters() {
-  // Ryd alle input felter - sæt value til tom string eller standard værdi
   document.querySelector("#search-input").value = "";
-  document.querySelector("#genre-select").value = "all";
-  document.querySelector("#sort-select").value = "none";
-  document.querySelector("#year-from").value = "";
-  document.querySelector("#year-to").value = "";
-  document.querySelector("#rating-from").value = "";
-  document.querySelector("#rating-to").value = "";
-
-  // Kør filtrering igen (vil vise alle film da alle filtre er ryddet)
-  filterMovies();
+  document.querySelector("#number-players").value = "all";
+  document.querySelector("#time").value = "all";
+  document.querySelector("#category").value = "all";
+  filterGames();
 }
 
-// #8: Komplet filtrering med alle funktioner - den vigtigste funktion!
-function filterMovies() {
-  // Hent alle filter værdier fra input felterne
+// #8: Komplet filtrering (søgefelt + 3 kategorier)
+function filterGames() {
   const searchValue = document
     .querySelector("#search-input")
-    .value.toLowerCase(); // Konvertér til lowercase for case-insensitive søgning
-  const genreValue = document.querySelector("#genre-select").value;
-  const sortValue = document.querySelector("#sort-select").value;
+    .value.toLowerCase();
+  const playersValue = document.querySelector("#number-players").value; // "1-2","3","4","5","6+"
+  const timeValue = document.querySelector("#time").value; // "20","30","40","45","60+"
+  const categoryValue = document.querySelector("#category").value; // fx "Strategispil"
 
-  // Number() konverterer string til tal, || 0 giver default værdi hvis tomt
-  const yearFrom = Number(document.querySelector("#year-from").value) || 0;
-  const yearTo = Number(document.querySelector("#year-to").value) || 9999;
-  const ratingFrom = Number(document.querySelector("#rating-from").value) || 0;
-  const ratingTo = Number(document.querySelector("#rating-to").value) || 10;
+  let filtered = allGames.slice();
 
-  // Start med alle film - kopiér til ny variabel så vi ikke ændrer originalen
-  let filteredMovies = allMovies;
-
-  // FILTER 1: Søgetekst - filtrer på film titel
+  // Søgetekst i titel
   if (searchValue) {
-    // Kun filtrer hvis der er indtastet noget
-    filteredMovies = filteredMovies.filter((movie) => {
-      // includes() checker om søgeteksten findes i titlen
-      return movie.title.toLowerCase().includes(searchValue);
+    filtered = filtered.filter((game) =>
+      game.title?.toLowerCase().includes(searchValue)
+    );
+  }
+
+  // Antal spillere (robust: overlap)
+  if (playersValue !== "all") {
+    const want = playersValue.endsWith("+")
+      ? { min: parseInt(playersValue), max: Infinity }
+      : playersValue.includes("-")
+      ? {
+          min: parseInt(playersValue.split("-")[0]),
+          max: parseInt(playersValue.split("-")[1]),
+        }
+      : { min: parseInt(playersValue), max: parseInt(playersValue) };
+
+    filtered = filtered.filter((game) =>
+      overlaps(parsePlayers(game.players), want)
+    );
+  }
+
+  // Varighed (robust: 60+ matcher 90-120 osv.)
+  if (timeValue !== "all") {
+    if (timeValue.endsWith("+")) {
+      const n = parseInt(timeValue);
+      filtered = filtered.filter(
+        (game) => parseMinutes(game.playtime).max >= n
+      );
+    } else {
+      const n = parseInt(timeValue);
+      filtered = filtered.filter((game) => {
+        const have = parseMinutes(game.playtime);
+        return have.min <= n && n <= have.max;
+      });
+    }
+  }
+
+  // Kategori/genre
+  if (categoryValue !== "all") {
+    filtered = filtered.filter((game) => {
+      const g = Array.isArray(game.genre) ? game.genre : [game.genre];
+      return g.filter(Boolean).includes(categoryValue);
     });
   }
 
-  // FILTER 2: Genre - filtrer på valgt genre
-  if (genreValue !== "all") {
-    // Kun filtrer hvis ikke "all" er valgt
-    filteredMovies = filteredMovies.filter((movie) => {
-      // includes() checker om genren findes i filmens genre array
-      return movie.genre.includes(genreValue);
-    });
-  }
-
-  // FILTER 3: År range - filtrer film mellem to årstal
-  if (yearFrom > 0 || yearTo < 9999) {
-    // Kun filtrer hvis der er sat grænser
-    filteredMovies = filteredMovies.filter((movie) => {
-      // Check om filmens år er mellem min og max værdi
-      return movie.year >= yearFrom && movie.year <= yearTo;
-    });
-  }
-
-  // FILTER 4: Rating range - filtrer film mellem to ratings
-  if (ratingFrom > 0 || ratingTo < 10) {
-    // Kun filtrer hvis der er sat grænser
-    filteredMovies = filteredMovies.filter((movie) => {
-      // Check om filmens rating er mellem min og max værdi
-      return movie.rating >= ratingFrom && movie.rating <= ratingTo;
-    });
-  }
-
-  // SORTERING (altid til sidst efter alle filtre er anvendt)
-  if (sortValue === "title") {
-    // Alfabetisk sortering - localeCompare() håndterer danske bogstaver korrekt
-    filteredMovies.sort((a, b) => a.title.localeCompare(b.title));
-  } else if (sortValue === "year") {
-    // Sortér på år (nyeste først) - b - a giver descending order
-    filteredMovies.sort((a, b) => b.year - a.year);
-  } else if (sortValue === "rating") {
-    // Sortér på rating (højeste først) - b - a giver descending order
-    filteredMovies.sort((a, b) => b.rating - a.rating);
-  }
-
-  // Vis de filtrerede film på siden
-  displayMovies(filteredMovies);
+  displayGames(filtered);
 }

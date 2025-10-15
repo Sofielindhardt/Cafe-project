@@ -3,124 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie App</title>
+    <title>Spiloversigt</title>
     <link rel="stylesheet" href="app.css" />
-    <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon" />
   </head>
-
   <body>
     <header>
-      <h1>🎬 Movie Database</h1>
+      <h1>Spiloversigt</h1>
     </header>
 
     <main>
-      <!-- Filter bar med alle filtreringsmuligheder -->
-      <section class="filterbar">
-        <!-- Øverste række: Søg og genre -->
-        <div class="filter-row-main">
-          <div class="filter-group search-group">
-            <label for="search-input">🔍 Søg</label>
-            <input
-              type="text"
-              id="search-input"
-              placeholder="Søg efter film..."
-            />
-          </div>
+      <!-- SØG + 3 FILTRE: spillere, varighed, kategori -->
+      <div class="filterbar">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Søg spil..."
+          aria-label="Søg spil"
+        />
 
-          <div class="filter-group">
-            <label for="genre-select">🎭 Genre</label>
-            <select id="genre-select">
-              <option value="all">Alle genrer</option>
-              <!-- Genrer indsættes dynamisk via JavaScript -->
-            </select>
-          </div>
+        <select id="number-players" aria-label="Antal spillere">
+          <option value="all">Antal spillere</option>
+          <option value="1-2">1-2 spillere</option>
+          <option value="3">3 spillere</option>
+          <option value="4">4 spillere</option>
+          <option value="5">5 spillere</option>
+          <option value="6+">6+ spillere</option>
+        </select>
 
-          <div class="filter-group">
-            <label for="sort-select">📊 Sortering</label>
-            <select id="sort-select">
-              <option value="none">Ingen sortering</option>
-              <option value="title">Titel (A-Å)</option>
-              <option value="year">År (nyeste først)</option>
-              <option value="rating">Rating (højeste først)</option>
-            </select>
-          </div>
-        </div>
+        <select id="time" aria-label="Varighed">
+          <option value="all">Varighed</option>
+          <option value="20">Ca. 20 min.</option>
+          <option value="30">Ca. 30 min.</option>
+          <option value="40">Ca. 40 min.</option>
+          <option value="45">Ca. 45 min.</option>
+          <option value="60+">60+ min.</option>
+        </select>
 
-        <!-- Nederste række: År og Rating ranges -->
-        <div class="filter-row-ranges">
-          <!-- År range filter -->
-          <div class="filter-group range-group">
-            <label class="range-label">📅 Udgivelsesår</label>
-            <div class="range-inputs">
-              <input
-                type="number"
-                id="year-from"
-                placeholder="1990"
-                min="1900"
-                max="2030"
-              />
-              <span class="range-separator">→</span>
-              <input
-                type="number"
-                id="year-to"
-                placeholder="2025"
-                min="1900"
-                max="2030"
-              />
-            </div>
-          </div>
+        <select id="category" aria-label="Kategori">
+          <option value="all">Kategori</option>
+          <!-- Fyldes dynamisk af JS -->
+        </select>
 
-          <!-- Rating range filter -->
-          <div class="filter-group range-group">
-            <label class="range-label">⭐ Rating</label>
-            <div class="range-inputs">
-              <input
-                type="number"
-                id="rating-from"
-                placeholder="0.0"
-                min="0"
-                max="10"
-                step="0.1"
-              />
-              <span class="range-separator">→</span>
-              <input
-                type="number"
-                id="rating-to"
-                placeholder="10.0"
-                min="0"
-                max="10"
-                step="0.1"
-              />
-            </div>
-          </div>
+        <button id="clear-filters">Ryd filtre</button>
+      </div>
 
-          <!-- Ryd alle filtre knap -->
-          <button id="clear-filters" class="clear-btn">
-            <span class="btn-icon">🗑️</span>
-            <span class="btn-text">Ryd filtre</span>
-          </button>
-        </div>
-      </section>
-
-      <!-- Movie grid -->
-      <section id="movie-list" class="movie-grid">
-        <!-- Film vil blive indsat her dynamisk -->
-      </section>
+      <!-- DYNAMISK LISTE -->
+      <section id="game-list" class="game-grid"></section>
     </main>
 
-    <!-- Footer -->
-    <footer>
-      <p>© RACE - Rasmus Cederdorff</p>
-    </footer>
-
-    <!-- Movie Detail Modal -->
-    <dialog id="movie-dialog">
-      <form method="dialog">
-        <button id="close-dialog" aria-label="Close">✕</button>
-        <div id="dialog-content">
-          <!-- Movie details will be injected here via JavaScript -->
-        </div>
-      </form>
+    <!-- MODAL -->
+    <dialog id="game-dialog">
+      <div id="dialog-content"></div>
+      <button onclick="document.getElementById('game-dialog').close()">
+        Luk
+      </button>
     </dialog>
 
     <script src="app.js"></script>
